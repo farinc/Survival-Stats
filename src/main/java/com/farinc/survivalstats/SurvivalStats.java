@@ -2,7 +2,12 @@ package com.farinc.survivalstats;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.capabilities.CapabilityManager;
+import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.InterModComms;
@@ -16,8 +21,12 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.farinc.survivalstats.capabilities.BasicHeatExchanger;
+import com.farinc.survivalstats.capabilities.BasicHeatExchanger.HeatStorage;
+import com.farinc.survivalstats.capabilities.IHeatExchanger;
 import com.farinc.survivalstats.client.StatHud;
 
+import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 // The value here should match an entry in the META-INF/mods.toml file
@@ -44,7 +53,7 @@ public class SurvivalStats
 
     private void setup(final FMLCommonSetupEvent event)
     {
-        
+    	BasicHeatExchanger.HeatCapability.register();
     }
 
     private void doClientStuff(final FMLClientSetupEvent event) 
@@ -85,4 +94,12 @@ public class SurvivalStats
             LOGGER.info("HELLO from Register Block");
         }
     }
+    
+    @SubscribeEvent
+    public void attachCap(final AttachCapabilitiesEvent<Entity> event) {
+    	if(event.getObject() instanceof PlayerEntity ) {
+    		event.addCapability(new ResourceLocation(MODID, "heat"), new BasicHeatExchanger.HeatCapability());
+    	}
+    }
+    
 }

@@ -18,13 +18,9 @@ version="${file.jarVersion}" #mandatory
  # A display name for the mod
 displayName="Survival Stats" #mandatory
 # A URL to query for updates for this mod. See the JSON update specification <here>
-updateJSONURL="" #optional
 # A URL for the "homepage" for this mod, displayed in the mod UI
-displayURL="" #optional
 # A file name (in the root of the mod JAR) containing a logo for display
-logoFile="" #optional
 # A text field displayed in the mod UI
-credits="" #optional
 # A text field displayed in the mod UI
 authors="farinc, thejavakid1" #optional
 # The description text for the mod (multi line!) (#mandatory)
