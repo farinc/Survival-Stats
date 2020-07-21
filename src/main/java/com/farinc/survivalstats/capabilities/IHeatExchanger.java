@@ -1,8 +1,7 @@
 package com.farinc.survivalstats.capabilities;
 
 /**
- * A base interface that ascribes any object with the idea of hotness.
- * @author farinc
+ * A base interface that ascribes any object with the idea of hotness. 
  *
  */
 public interface IHeatExchanger {
@@ -10,12 +9,9 @@ public interface IHeatExchanger {
 	public void inputHeat(float heat);
 	
 	public float outputHeat();
+		
+	public float getInternalEnergy();
 	
-	public float getSpecificHeatCofficent();
-	
-	public float getTemperature();
-	
-	public void setTemperature(float temperature);
-	
-	public void setSpecificHeatCofficent(float specificHeatCofficent);
+	public void setInternalEnergy(float internalEnergy);
+		
 }

@@ -4,6 +4,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.CapabilityManager;
@@ -25,6 +26,7 @@ import com.farinc.survivalstats.capabilities.BasicHeatExchanger;
 import com.farinc.survivalstats.capabilities.BasicHeatExchanger.HeatStorage;
 import com.farinc.survivalstats.capabilities.IHeatExchanger;
 import com.farinc.survivalstats.client.StatHud;
+import com.farinc.survivalstats.common.items.TestHeatItem;
 
 import java.util.ArrayList;
 import java.util.stream.Collectors;
@@ -37,6 +39,8 @@ public class SurvivalStats
     public static final Logger LOGGER = LogManager.getLogger();
     
     public static final String MODID = "survivalstats";
+    
+    public static TestHeatItem testheatitem;
 
     public SurvivalStats() {
         // Register the setup method for modloading
@@ -54,6 +58,8 @@ public class SurvivalStats
     private void setup(final FMLCommonSetupEvent event)
     {
     	BasicHeatExchanger.HeatCapability.register();
+    	
+    	
     }
 
     private void doClientStuff(final FMLClientSetupEvent event) 
@@ -93,12 +99,20 @@ public class SurvivalStats
             // register a new block here
             LOGGER.info("HELLO from Register Block");
         }
+        
+        @SubscribeEvent
+        public static void onItemsRegistry(final RegistryEvent.Register<Item> event) {
+            event.getRegistry().register(testheatitem = new TestHeatItem());
+        }
+        
     }
     
     @SubscribeEvent
     public void attachCap(final AttachCapabilitiesEvent<Entity> event) {
     	if(event.getObject() instanceof PlayerEntity ) {
-    		event.addCapability(new ResourceLocation(MODID, "heat"), new BasicHeatExchanger.HeatCapability());
+    		System.out.println("hello");
+    		BasicHeatExchanger.HeatCapability cap = new BasicHeatExchanger.HeatCapability();
+    		event.addCapability(new ResourceLocation(MODID, "heat"), cap);
     	}
     }
     

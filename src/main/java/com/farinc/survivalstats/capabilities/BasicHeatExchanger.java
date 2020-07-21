@@ -8,7 +8,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.FloatNBT;
 import net.minecraft.util.Direction;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.Capability.IStorage;
@@ -17,14 +16,19 @@ import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.common.capabilities.ICapabilitySerializable;
 import net.minecraftforge.common.util.LazyOptional;
 
+/**
+ * The basic implementation of IHeatExchanger
+ * @author farinc
+ *
+ */
+
 public class BasicHeatExchanger implements IHeatExchanger {
 
-	private float temperature;
-	private float specificHeatCofficent;
+	private float internalEnergy;
 	
 	@Override
 	public void inputHeat(float heat) {
-		this.temperature = specificHeatCofficent * heat;
+		this.internalEnergy += heat;
 	}
 
 	@Override
@@ -32,34 +36,22 @@ public class BasicHeatExchanger implements IHeatExchanger {
 		return 0;
 	}
 	
-	
 	@Override
-	public float getSpecificHeatCofficent() {
-		return this.specificHeatCofficent;
+	public float getInternalEnergy() {
+		return internalEnergy;
 	}
-	
+
 	@Override
-	public float getTemperature() {
-		return this.temperature;
+	public void setInternalEnergy(float internalEnergy) {
+		this.internalEnergy = internalEnergy;
 	}
-	
-	@Override
-	public void setSpecificHeatCofficent(float specificHeatCofficent) {
-		this.specificHeatCofficent = specificHeatCofficent;
-	}
-	
-	@Override
-	public void setTemperature(float temperature) {
-		this.temperature = temperature;
-	}
-	
+
 	public static class HeatStorage implements IStorage<IHeatExchanger>{
 
 		@Override
 		public INBT writeNBT(Capability<IHeatExchanger> capability, IHeatExchanger instance, Direction side) {
 			CompoundNBT nbt = new CompoundNBT();
-			nbt.putFloat("temp", instance.getTemperature());
-			nbt.putFloat("coff", instance.getSpecificHeatCofficent());
+			nbt.putFloat("internalEnergy", instance.getInternalEnergy());
 			return nbt;
 			
 		}
@@ -67,17 +59,15 @@ public class BasicHeatExchanger implements IHeatExchanger {
 		@Override
 		public void readNBT(Capability<IHeatExchanger> capability, IHeatExchanger instance, Direction side, INBT nbt) {
 			CompoundNBT cnbt = (CompoundNBT)nbt;
-			instance.setTemperature(cnbt.getFloat("temp"));
-			instance.setSpecificHeatCofficent(cnbt.getFloat("coff"));
+			instance.setInternalEnergy(cnbt.getFloat("internalEnergy"));
 			
 		}
 	}
 	
 	private static class Factory implements Callable<IHeatExchanger> {
 
-		public Factory() {
-			// TODO Auto-generated constructor stub
-		}
+		public Factory() {}
+		
 		@Override
 		public IHeatExchanger call() throws Exception {
 			return new BasicHeatExchanger();
@@ -85,7 +75,7 @@ public class BasicHeatExchanger implements IHeatExchanger {
 		
 	}
 	
-	public static class HeatCapability implements ICapabilitySerializable<FloatNBT> {
+	public static class HeatCapability implements ICapabilitySerializable<CompoundNBT> {
 		
 		@CapabilityInject(IHeatExchanger.class)
 		public static final Capability<IHeatExchanger> HEATEXCHANGER_CAPABILITY = null;
@@ -103,12 +93,12 @@ public class BasicHeatExchanger implements IHeatExchanger {
 		}
 		
 		@Override
-		public FloatNBT serializeNBT() {
-		    return (FloatNBT) HEATEXCHANGER_CAPABILITY.getStorage().writeNBT(HEATEXCHANGER_CAPABILITY, instance.orElseThrow(() -> new IllegalArgumentException("LazyOptional cannot be empty!")), null);
+		public CompoundNBT serializeNBT() {
+		    return (CompoundNBT) HEATEXCHANGER_CAPABILITY.getStorage().writeNBT(HEATEXCHANGER_CAPABILITY, instance.orElseThrow(() -> new IllegalArgumentException("LazyOptional cannot be empty!")), null);
 		}
 		
 		@Override
-		public void deserializeNBT(FloatNBT nbt) {
+		public void deserializeNBT(CompoundNBT nbt) {
 			HEATEXCHANGER_CAPABILITY.getStorage().readNBT(HEATEXCHANGER_CAPABILITY, instance.orElseThrow(() -> new IllegalArgumentException("LazyOptional cannot be empty!")), null, nbt);
 		}
 	}
