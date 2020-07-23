@@ -1,20 +1,15 @@
 package com.farinc.survivalstats.client;
 
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.core.Logger;
-
 import com.farinc.survivalstats.SurvivalStats;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 
 
 @Mod.EventBusSubscriber(modid = SurvivalStats.MODID, value = Dist.CLIENT)

@@ -1,15 +1,25 @@
 package com.farinc.survivalstats;
 
+import java.util.stream.Collectors;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import com.farinc.survivalstats.api.heat.ISource;
+import com.farinc.survivalstats.capabilities.PlayerSink;
+import com.farinc.survivalstats.client.StatHud;
+import com.farinc.survivalstats.common.items.TestHeatItem;
+
 import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.TickEvent.Phase;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.InterModComms;
 import net.minecraftforge.fml.common.Mod;
@@ -19,17 +29,6 @@ import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
 import net.minecraftforge.fml.event.lifecycle.InterModProcessEvent;
 import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import com.farinc.survivalstats.capabilities.BasicHeatExchanger;
-import com.farinc.survivalstats.capabilities.BasicHeatExchanger.HeatStorage;
-import com.farinc.survivalstats.capabilities.IHeatExchanger;
-import com.farinc.survivalstats.client.StatHud;
-import com.farinc.survivalstats.common.items.TestHeatItem;
-
-import java.util.ArrayList;
-import java.util.stream.Collectors;
 
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod(SurvivalStats.MODID)
@@ -57,7 +56,7 @@ public class SurvivalStats
 
     private void setup(final FMLCommonSetupEvent event)
     {
-    	BasicHeatExchanger.HeatCapability.register();
+    	PlayerSink.HeatCapability.register();
     	
     	
     }
@@ -110,9 +109,17 @@ public class SurvivalStats
     @SubscribeEvent
     public void attachCap(final AttachCapabilitiesEvent<Entity> event) {
     	if(event.getObject() instanceof PlayerEntity ) {
-    		System.out.println("hello");
-    		BasicHeatExchanger.HeatCapability cap = new BasicHeatExchanger.HeatCapability();
+    		PlayerSink.HeatCapability cap = new PlayerSink.HeatCapability();
     		event.addCapability(new ResourceLocation(MODID, "heat"), cap);
+    	}
+    }
+    
+    @SubscribeEvent
+    public void onPlayerTick(final TickEvent.PlayerTickEvent event) 
+    {
+    	//There is a start and end phase
+    	if(event.phase == Phase.START) {
+    		
     	}
     }
     
