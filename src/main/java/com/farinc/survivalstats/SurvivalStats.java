@@ -5,7 +5,6 @@ import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.farinc.survivalstats.api.heat.ISource;
 import com.farinc.survivalstats.capabilities.PlayerSink;
 import com.farinc.survivalstats.client.StatHud;
 import com.farinc.survivalstats.common.items.TestHeatItem;
@@ -18,8 +17,6 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.TickEvent.Phase;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.InterModComms;
 import net.minecraftforge.fml.common.Mod;
@@ -39,6 +36,8 @@ public class SurvivalStats
     
     public static final String MODID = "survivalstats";
     
+    public static final HeatTickHandler heathandler = new HeatTickHandler();
+    
     public static TestHeatItem testheatitem;
 
     public SurvivalStats() {
@@ -52,6 +51,7 @@ public class SurvivalStats
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::doClientStuff);
         // Register ourselves for server and other game events we are interested in
         MinecraftForge.EVENT_BUS.register(this);
+        MinecraftForge.EVENT_BUS.register(heathandler);
     }
 
     private void setup(final FMLCommonSetupEvent event)
@@ -111,15 +111,6 @@ public class SurvivalStats
     	if(event.getObject() instanceof PlayerEntity ) {
     		PlayerSink.HeatCapability cap = new PlayerSink.HeatCapability();
     		event.addCapability(new ResourceLocation(MODID, "heat"), cap);
-    	}
-    }
-    
-    @SubscribeEvent
-    public void onPlayerTick(final TickEvent.PlayerTickEvent event) 
-    {
-    	//There is a start and end phase
-    	if(event.phase == Phase.START) {
-    		
     	}
     }
     

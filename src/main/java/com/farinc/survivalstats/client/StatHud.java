@@ -22,7 +22,10 @@ public class StatHud {
 		//tex = new ResourceLocation(SurvivalStats.MODID, "textures/weather/rain_sun.png");
 	}
 	
-	@SubscribeEvent
+	/*
+	* Uncomment to trigger the render overlay
+	*/
+	//@SubscribeEvent
 	public void renderOverlay(RenderGameOverlayEvent.Post event) {
 		if(event.getType() == ElementType.ALL) {
 			

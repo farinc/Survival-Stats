@@ -1,7 +1,11 @@
-package com.farinc.survivalstats.api.heat;
+package com.farinc.survivalstats.api.heat.impl;
+
+import com.farinc.survivalstats.api.heat.ISource;
 
 /**
- * This provides an approachable method of implementing the {@link ISource} interface. 
+ * This provides an approachable method of implementing the {@link ISource}
+ * interface.
+ * 
  * @author farinc
  *
  */

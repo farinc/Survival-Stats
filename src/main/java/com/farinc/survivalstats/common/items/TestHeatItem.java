@@ -1,7 +1,7 @@
 package com.farinc.survivalstats.common.items;
 
 import com.farinc.survivalstats.SurvivalStats;
-import com.farinc.survivalstats.api.heat.IResistiveSink;
+import com.farinc.survivalstats.api.heat.ISink;
 import com.farinc.survivalstats.capabilities.PlayerSink;
 
 import net.minecraft.entity.player.PlayerEntity;
@@ -28,9 +28,9 @@ public class TestHeatItem extends Item {
 	@Override
     public ActionResult<ItemStack> onItemRightClick(World worldIn, PlayerEntity playerIn, Hand handIn) {
         if(!worldIn.isRemote)
-            playerIn.getCapability(PlayerSink.HeatCapability.HEATEXCHANGER_CAPABILITY).ifPresent((IResistiveSink t) -> {
+            playerIn.getCapability(PlayerSink.HeatCapability.HEATEXCHANGER_CAPABILITY).ifPresent((ISink t) -> {
             	playerIn.sendStatusMessage(new StringTextComponent("Heat: "+t.getHotness()), false);
-            	t.transfer(50.0F);
+            	//t.transfer(50.0F);
             });
         return super.onItemRightClick(worldIn, playerIn, handIn);
     }
