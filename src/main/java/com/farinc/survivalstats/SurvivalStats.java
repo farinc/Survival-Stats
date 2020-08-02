@@ -7,6 +7,7 @@ import org.apache.logging.log4j.Logger;
 
 import com.farinc.survivalstats.api.SurvivalStatsAPI;
 import com.farinc.survivalstats.capabilities.PlayerSink;
+import com.farinc.survivalstats.capabilities.PlayerStat;
 import com.farinc.survivalstats.client.StatHud;
 import com.farinc.survivalstats.client.gui.InventoryTabHandler;
 import com.farinc.survivalstats.common.items.TestHeatItem;
@@ -61,8 +62,7 @@ public class SurvivalStats
     private void setup(final FMLCommonSetupEvent event)
     {
     	PlayerSink.HeatCapability.register();
-    	
-    	
+    	PlayerStat.StatCapability.register();
     }
 
     private void doClientStuff(final FMLClientSetupEvent event) 
@@ -113,8 +113,11 @@ public class SurvivalStats
     @SubscribeEvent
     public void attachCap(final AttachCapabilitiesEvent<Entity> event) {
     	if(event.getObject() instanceof PlayerEntity ) {
-    		PlayerSink.HeatCapability cap = new PlayerSink.HeatCapability();
-    		event.addCapability(new ResourceLocation(MODID, "heat"), cap);
+            PlayerSink.HeatCapability cap = new PlayerSink.HeatCapability();
+            PlayerStat.StatCapability cap1 = new PlayerStat.StatCapability();
+            
+            event.addCapability(new ResourceLocation(MODID, "heat"), cap);
+            event.addCapability(new ResourceLocation(MODID, "stat"), cap1);
     	}
     }
     

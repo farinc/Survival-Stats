@@ -6,7 +6,6 @@ import com.farinc.survivalstats.api.SurvivalStatsAPI.TickRate;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.INBT;
 import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 
