@@ -5,8 +5,10 @@ import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.farinc.survivalstats.api.SurvivalStatsAPI;
 import com.farinc.survivalstats.capabilities.PlayerSink;
 import com.farinc.survivalstats.client.StatHud;
+import com.farinc.survivalstats.client.gui.InventoryTabHandler;
 import com.farinc.survivalstats.common.items.TestHeatItem;
 
 import net.minecraft.block.Block;
@@ -40,6 +42,8 @@ public class SurvivalStats
     
     public static TestHeatItem testheatitem;
 
+    public static SurvivalStatsAPI instanceAPI = new SurvivalStatsAPI();
+
     public SurvivalStats() {
         // Register the setup method for modloading
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
@@ -66,6 +70,7 @@ public class SurvivalStats
         // do something that can only be done on the client
         //LOGGER.info("Got game settings {}", event.getMinecraftSupplier().get().gameSettings);
         MinecraftForge.EVENT_BUS.register(new StatHud());
+        MinecraftForge.EVENT_BUS.register(new InventoryTabHandler());
         
     }
 
@@ -96,7 +101,6 @@ public class SurvivalStats
         @SubscribeEvent
         public static void onBlocksRegistry(final RegistryEvent.Register<Block> blockRegistryEvent) {
             // register a new block here
-            LOGGER.info("HELLO from Register Block");
         }
         
         @SubscribeEvent

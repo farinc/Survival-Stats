@@ -1,70 +1,67 @@
 package com.farinc.survivalstats.api.stats;
 
+import javax.annotation.Nonnull;
+
+import com.farinc.survivalstats.api.SurvivalStatsAPI.TickRate;
+
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.INBT;
+import net.minecraft.util.Direction;
+import net.minecraft.util.ResourceLocation;
 
 /**
- * Represents the player's "upgrades". Do note that a stat will only be added 
- * if at least one upgrade exists, otherwise it is not active on player.
- * 
- * TODO: plan handling the client vs. server side logic.
+ * Represents the player's "upgrades".
  */
-public abstract class Stat {
+public abstract class Stat  {
 
-    public class StatUpgradeCost {
+    /**
+     * The current level of a instance
+     */
+    protected int level;
+    
+    /**
+     * While this is 
+     */
+    protected final String statID;
 
-        IStatUpgradeComponent[] components;
-
-        public StatUpgradeCost(IStatUpgradeComponent...components) {
-            this.components = components;
-        }
-
-        public String[] getTypes(){
-            String[] types = new String[components.length];
-            for(int i = 0; i < types.length; i++){
-                types[i] = this.components[i].getComponentID();
-            }
-
-            return types;
-        }
-
+    public Stat(String statID) {
+        this.statID = statID;
     }
 
     /**
-     * Max level this stat can be.
-     * @return the number for level
+     * Serialize this component into a nbt tag. When overriding, capture the super to continue use of the provided {@code CompoundNBT}
+     * By default, the field {@link #level} is saved and the next level up {@code StatUpgradeCost} is saved.
+     * @param side This is the same as the {@code IStorage.writeNBT(Capability<ISink>, ISink, Direction)}
+     * @return A nbt tag representing this component
      */
-    public abstract int getMaxLevel();
+    public CompoundNBT writeNBT(Direction side) {
+        CompoundNBT nbt = new CompoundNBT();
+        nbt.putInt("level", this.level);
+
+        //Write the upgrade cost for the next level 
+        nbt.put("upgradeWork", this.getUpgradeCost(this.level + 1).writeNBT(side));
+
+        nbt.putString("id", this.statID);
+        return nbt;
+    }
 
     /**
-     * Give the current "level" of this stat. 
-     * @return The level
+     * Read nbt tag to generate component data
+     * @param nbt
+     * @param side
      */
-    public abstract int getCurrentLevel();
+    public void readNBT(CompoundNBT nbt, Direction side) {
+        this.level = nbt.getInt("level");
+    }
 
     /**
-     * Get the id of this stat (the unlocalized name). Do this prefixed with a modid. 
-     * @return
+     * Give the tick rate based on need. If possible, try to base such components on satisfiable 
+     * events and return NONE.
+     * @return the tick rate of the stat
      */
-    public abstract String getStatID();
-
-    /**
-     * Get the title of this stat. TODO: localize
-     * @return
-     */
-    public abstract String getTitle();
-
-    /**
-     * Get the description of the stat. TODO: localize
-     * @return
-     */
-    public abstract String getDescription();
-
-    /**
-     * Does this stat need to tick? Recall this can be implemented alongside
-     * forge events, making this stat event based and foregoing ticking
-     * @return
-     */
-    public abstract boolean isTickable();
+    @Nonnull
+    public abstract TickRate getTickRate();
 
     /**
      * Get the cost associated with upgrading to the level selected. 
@@ -75,8 +72,46 @@ public abstract class Stat {
 
     /**
      * Use this stat on the player. This includes applying potion effects, 
-     * changing player health, etc.
+     * changing player health, etc. This is triggered by either ticking or whatever system.
      * @param player
      */
     public abstract void applyStat(PlayerEntity player);
+
+    //Client stuff
+
+    /**
+     *  
+     * @return give the icon for this component to be displayed
+     */
+    public abstract ResourceLocation getDisplayIcon();
+
+    /**
+     * A short description of what this component is currently doing
+     * @return String
+     */
+    public abstract String getDescriptionString();
+
+    public class StatUpgradeCost {
+
+        StatUpgradeComponent[] components;
+
+        public StatUpgradeCost(StatUpgradeComponent...components) {
+            this.components = components;
+        }
+
+        public CompoundNBT writeNBT(Direction side) {
+            CompoundNBT nbt = new CompoundNBT();
+            for(StatUpgradeComponent upgrade : this.components){
+                nbt.put(upgrade.getComponentID(), upgrade.writeNBT(side));
+            }
+
+            return nbt;
+        }
+
+        public void readNBT(CompoundNBT nbt, Direction side){
+            for(StatUpgradeComponent upgrade : this.components){
+                upgrade.readNBT(nbt.get(upgrade.getComponentID()), side);
+            }
+        }
+    }
 }
