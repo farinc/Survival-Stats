@@ -1,0 +1,9 @@
+{
+    "stat.cold_hardened.title": "Cold Hardened",
+    "stat.cold_hardened.description": "Increases resistance to the cold",
+    "stat.cold_hardened.tooltip": [
+        "5% chance to remain warm every cycle while cold",
+        "10% chance to remain warm every cycle while cold",
+        "15% chance to remain warm every cycle while cold"
+    ]
+}

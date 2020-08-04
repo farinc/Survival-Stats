@@ -15,17 +15,12 @@ import net.minecraft.util.ResourceLocation;
  * of kills a player makes or a certain magical cost thingy in the area must be satisfied. This 
  * component is identified and linked to players individually through the capability system.
  */
-public abstract class StatUpgradeComponent {
+public abstract class StatComponent {
 
-    /**
-     * The id of the component. This is not really registered with a factory mainly due to design differences.
-     * Unlike the stats, components are instantiated with the {@code Stat.getUpgradeCost} and a factory defeats
-     * the purpose of more custom constructors to pass finalized data through.
-     */
-    private String componentString;
+    public final String componentID;
 
-    public final String getComponentID(){
-        return this.componentString;
+    public StatComponent(String componentID){
+        this.componentID = componentID;
     }
 
     /**
@@ -82,9 +77,13 @@ public abstract class StatUpgradeComponent {
     public abstract ResourceLocation getDisplayIcon();
 
     /**
-     * A short description of what this component is and "paying" for the icon.
-     * @return String
+     * Return the translation key for a this component. This is the stat.yourstatid as the rest
+     * like the title and tooltip are derived from this. While this is handled like above this 
+     * can be overridden.
+     * @return the translation key String
      */
-    public abstract String getDescriptionString();
+    public String getTranslationKey(){
+        return "stat_component.".concat(this.componentID);
+    }
 
 }

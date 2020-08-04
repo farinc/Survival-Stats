@@ -1,16 +1,14 @@
 package com.farinc.survivalstats;
 
-import java.util.stream.Collectors;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.farinc.survivalstats.api.SurvivalStatsAPI;
 import com.farinc.survivalstats.capabilities.PlayerSink;
 import com.farinc.survivalstats.capabilities.PlayerStat;
-import com.farinc.survivalstats.client.StatHud;
-import com.farinc.survivalstats.client.gui.InventoryTabHandler;
+import com.farinc.survivalstats.common.config.StatJSONLoader;
+import com.farinc.survivalstats.common.handlers.HeatTickHandler;
 import com.farinc.survivalstats.common.items.TestHeatItem;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
@@ -21,13 +19,11 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.InterModComms;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
 import net.minecraftforge.fml.event.lifecycle.InterModProcessEvent;
-import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 // The value here should match an entry in the META-INF/mods.toml file
@@ -40,6 +36,8 @@ public class SurvivalStats
     public static final String MODID = "survivalstats";
     
     public static final HeatTickHandler heathandler = new HeatTickHandler();
+
+    public static final StatJSONLoader statloader = new StatJSONLoader();
     
     public static TestHeatItem testheatitem;
 
@@ -56,43 +54,27 @@ public class SurvivalStats
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::doClientStuff);
         // Register ourselves for server and other game events we are interested in
         MinecraftForge.EVENT_BUS.register(this);
-        MinecraftForge.EVENT_BUS.register(heathandler);
     }
 
     private void setup(final FMLCommonSetupEvent event)
     {
     	PlayerSink.HeatCapability.register();
-    	PlayerStat.StatCapability.register();
+        PlayerStat.StatCapability.register();
+        statloader.register();
+        heathandler.register();
     }
 
     private void doClientStuff(final FMLClientSetupEvent event) 
     {
-        // do something that can only be done on the client
-        //LOGGER.info("Got game settings {}", event.getMinecraftSupplier().get().gameSettings);
-        MinecraftForge.EVENT_BUS.register(new StatHud());
-        MinecraftForge.EVENT_BUS.register(new InventoryTabHandler());
-        
+        // do something that can only be done on the client        
     }
 
     private void enqueueIMC(final InterModEnqueueEvent event)
     {
         // some example code to dispatch IMC to another mod
-        InterModComms.sendTo(SurvivalStats.MODID, "helloworld", () -> { LOGGER.info("Hello world from the MDK"); return "Hello world";});
     }
 
-    private void processIMC(final InterModProcessEvent event)
-    {
-        // some example code to receive and process InterModComms from other mods
-        LOGGER.info("Got IMC {}", event.getIMCStream().
-                map(m->m.getMessageSupplier().get()).
-                collect(Collectors.toList()));
-    }
-    // You can use SubscribeEvent and let the Event Bus discover methods to call
-    @SubscribeEvent
-    public void onServerStarting(FMLServerStartingEvent event) {
-        // do something when the server starts
-        LOGGER.info("HELLO from server starting");
-    }
+    private void processIMC(final InterModProcessEvent event) {}
 
     // You can use EventBusSubscriber to automatically subscribe events on the contained class (this is subscribing to the MOD
     // Event bus for receiving Registry Events)

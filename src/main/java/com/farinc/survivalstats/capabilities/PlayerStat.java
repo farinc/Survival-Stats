@@ -6,7 +6,7 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 
 import com.farinc.survivalstats.api.stats.Stat;
-import com.farinc.survivalstats.api.stats.StatFactory;
+import com.farinc.survivalstats.api.stats.StatRegistry;
 import com.farinc.survivalstats.api.stats.IStatHolder;
 
 import net.minecraft.nbt.CompoundNBT;
@@ -67,7 +67,7 @@ public class PlayerStat implements IStatHolder {
                 // grab its id for the factory registry. Then using the factory, instantiate the
                 // stat.
                 id = statNBT.getString("id");
-                stat = StatFactory.getStatInstance(id);
+                stat = StatRegistry.getStatFactory(id).createStat();
 
                 // read the nbt data into the newly instantiated stat and add to the stat holder
                 // instance.

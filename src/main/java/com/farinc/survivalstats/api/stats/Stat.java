@@ -6,26 +6,33 @@ import com.farinc.survivalstats.api.SurvivalStatsAPI.TickRate;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.INBT;
 import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 
 /**
  * Represents the player's "upgrades".
  */
-public abstract class Stat  {
+public abstract class Stat {
 
     /**
      * The current level of a instance
      */
     protected int level;
-    
-    /**
-     * While this is 
-     */
-    protected final String statID;
 
-    public Stat(String statID) {
+    /**
+     * The stat id passed to this stat. The really only good way to do so is through the factory.
+     */
+    public final String statID;
+
+    /**
+     * The components as a 2-dimensional array.
+     */
+    private final StatComponent[][] components;
+
+    public Stat(String statID, StatComponent[][] components) {
         this.statID = statID;
+        this.components = components;
     }
 
     /**
@@ -39,9 +46,14 @@ public abstract class Stat  {
         nbt.putInt("level", this.level);
 
         //Write the upgrade cost for the next level 
-        nbt.put("upgradeWork", this.getUpgradeCost(this.level + 1).writeNBT(side));
+        CompoundNBT upgradeNBT = new CompoundNBT();
+        INBT componentNBT;
+        for(StatComponent component : this.getUpgradeComponents(this.level + 1)){
+            componentNBT = component.writeNBT(side);
+            upgradeNBT.put(component.componentID, componentNBT);
+        }
 
-        nbt.putString("id", this.statID);
+        nbt.put("upgrade", upgradeNBT);
         return nbt;
     }
 
@@ -52,6 +64,13 @@ public abstract class Stat  {
      */
     public void readNBT(CompoundNBT nbt, Direction side) {
         this.level = nbt.getInt("level");
+
+        //Write the upgrade cost for the next level
+        CompoundNBT upgradeNBT = nbt.getCompound("upgrade");
+        for(StatComponent component : this.getUpgradeComponents(this.level + 1)){
+            component.readNBT(upgradeNBT.get(component.componentID), side);
+        }
+        
     }
 
     /**
@@ -62,12 +81,23 @@ public abstract class Stat  {
     @Nonnull
     public abstract TickRate getTickRate();
 
+
+    public final void updateUpgradeComponents(PlayerEntity player){
+        for(StatComponent com : this.getUpgradeComponents(this.level + 1)){
+            com.update(player);
+        }
+    }
+
     /**
-     * Get the cost associated with upgrading to the level selected. 
+     * Get the components associated with upgrading to the level selected. In other words,
+     * the components that need to be completed to advance in level.
      * @param level
      * @return
      */
-    public abstract StatUpgradeCost getUpgradeCost(int level);
+    public final StatComponent[] getUpgradeComponents(int level) {
+        if(level > 1 && level < this.components.length) return this.components[level - 1];
+        return null;
+    }
 
     /**
      * Use this stat on the player. This includes applying potion effects, 
@@ -79,38 +109,19 @@ public abstract class Stat  {
     //Client stuff
 
     /**
-     *  
-     * @return give the icon for this component to be displayed
+     * Used on the client for the icon that
+     * @return a ResourceLocation pointing to the icon.
      */
     public abstract ResourceLocation getDisplayIcon();
 
     /**
-     * A short description of what this component is currently doing
-     * @return String
+     * Return the translation key for a this stat. This is the stat.yourstatid as the rest
+     * like the title, description, and tooltip are derived from this. While this is handled like 
+     * above this can be overridden.
+     * @return the translation key String
      */
-    public abstract String getDescriptionString();
-
-    public class StatUpgradeCost {
-
-        StatUpgradeComponent[] components;
-
-        public StatUpgradeCost(StatUpgradeComponent...components) {
-            this.components = components;
-        }
-
-        public CompoundNBT writeNBT(Direction side) {
-            CompoundNBT nbt = new CompoundNBT();
-            for(StatUpgradeComponent upgrade : this.components){
-                nbt.put(upgrade.getComponentID(), upgrade.writeNBT(side));
-            }
-
-            return nbt;
-        }
-
-        public void readNBT(CompoundNBT nbt, Direction side){
-            for(StatUpgradeComponent upgrade : this.components){
-                upgrade.readNBT(nbt.get(upgrade.getComponentID()), side);
-            }
-        }
+    public String getTranslationKey(){
+        return "stat.".concat(statID);
     }
+
 }

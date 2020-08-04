@@ -1,19 +1,26 @@
-package com.farinc.survivalstats;
+package com.farinc.survivalstats.common.handlers;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import com.farinc.survivalstats.SurvivalStats;
 import com.farinc.survivalstats.api.heat.ISink;
 import com.farinc.survivalstats.capabilities.PlayerSink;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.TickEvent.Phase;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 
-class HeatTickHandler {
+public class HeatTickHandler {
+
+	public void register() {
+        MinecraftForge.EVENT_BUS.register(this);
+    }
 
 	/*
 	* A testing map of hot and cold blocks
@@ -59,7 +66,7 @@ class HeatTickHandler {
 	private PlayerEntity player;
 	private World world;
 
-	HeatTickHandler() {
+	public HeatTickHandler() {
 		//TODO: Config setting stuff here
 
 		map = new HashMap<String, Float>();
