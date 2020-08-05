@@ -4,7 +4,7 @@ import com.google.gson.JsonObject;
 
 public interface IStatFactory<T extends Stat> {
 
-    public String geStatID();
+    public String getStatID();
 
     public void setProperties(JsonObject properties);
 

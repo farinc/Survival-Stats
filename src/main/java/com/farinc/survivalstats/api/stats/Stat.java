@@ -74,13 +74,28 @@ public abstract class Stat {
     }
 
     /**
-     * Give the tick rate based on need. If possible, try to base such components on satisfiable 
-     * events and return NONE.
-     * @return the tick rate of the stat
+     * Return the translation key for a this stat. This is the stat.yourstatid as the rest
+     * like the title, description, and tooltip are derived from this. While this is handled 
+     * like above, this can be overridden.
+     * @return the translation key String
      */
-    @Nonnull
-    public abstract TickRate getTickRate();
+    public String getTranslationKey(){
+        return "stat.".concat(statID);
+    }
 
+    public final int getMaxLevel() {
+        return this.components.length;
+    }
+
+    public final int getLevel(){
+        return this.level;
+    }
+
+    public final void setLevel(int newLevel){
+        int netChange = newLevel - this.level;
+        this.level = newLevel;
+        this.onLevelChange(netChange);
+    }
 
     public final void updateUpgradeComponents(PlayerEntity player){
         for(StatComponent com : this.getUpgradeComponents(this.level + 1)){
@@ -95,7 +110,7 @@ public abstract class Stat {
      * @return
      */
     public final StatComponent[] getUpgradeComponents(int level) {
-        if(level > 1 && level < this.components.length) return this.components[level - 1];
+        if(level >= 1 && level < this.components.length) return this.components[level - 1];
         return null;
     }
 
@@ -106,6 +121,23 @@ public abstract class Stat {
      */
     public abstract void applyStat(PlayerEntity player);
 
+    
+    /**
+     * Gives the stat the ability to react to the change in level. Note however that {@link #setLevel(int)}
+     * that the new level has already been set. This is mostly for convenience and reinforcement of concept.
+     * @param netChange The change in level. The value is negative if it was a decrease in level and positive
+     * for an upgrade in level.
+     */
+    protected abstract void onLevelChange(int netChange);
+
+    /**
+     * Give the tick rate based on need. If possible, try to base such components on satisfiable 
+     * events and return NONE.
+     * @return the tick rate of the stat
+     */
+    @Nonnull
+    public abstract TickRate getTickRate();
+
     //Client stuff
 
     /**
@@ -113,15 +145,5 @@ public abstract class Stat {
      * @return a ResourceLocation pointing to the icon.
      */
     public abstract ResourceLocation getDisplayIcon();
-
-    /**
-     * Return the translation key for a this stat. This is the stat.yourstatid as the rest
-     * like the title, description, and tooltip are derived from this. While this is handled like 
-     * above this can be overridden.
-     * @return the translation key String
-     */
-    public String getTranslationKey(){
-        return "stat.".concat(statID);
-    }
 
 }
