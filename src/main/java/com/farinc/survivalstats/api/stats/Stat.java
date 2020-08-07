@@ -38,18 +38,18 @@ public abstract class Stat {
     /**
      * Serialize this component into a nbt tag. When overriding, capture the super to continue use of the provided {@code CompoundNBT}
      * By default, the field {@link #level} is saved and the next level up {@code StatUpgradeCost} is saved.
-     * @param side This is the same as the {@code IStorage.writeNBT(Capability<ISink>, ISink, Direction)}
      * @return A nbt tag representing this component
      */
-    public CompoundNBT writeNBT(Direction side) {
+    public CompoundNBT writeNBT() {
         CompoundNBT nbt = new CompoundNBT();
         nbt.putInt("level", this.level);
+        nbt.putString("id", this.statID);
 
         //Write the upgrade cost for the next level 
         CompoundNBT upgradeNBT = new CompoundNBT();
         INBT componentNBT;
         for(StatComponent component : this.getUpgradeComponents(this.level + 1)){
-            componentNBT = component.writeNBT(side);
+            componentNBT = component.writeNBT();
             upgradeNBT.put(component.componentID, componentNBT);
         }
 
@@ -60,15 +60,14 @@ public abstract class Stat {
     /**
      * Read nbt tag to generate component data
      * @param nbt
-     * @param side
      */
-    public void readNBT(CompoundNBT nbt, Direction side) {
+    public void readNBT(CompoundNBT nbt) {
         this.level = nbt.getInt("level");
 
         //Write the upgrade cost for the next level
         CompoundNBT upgradeNBT = nbt.getCompound("upgrade");
         for(StatComponent component : this.getUpgradeComponents(this.level + 1)){
-            component.readNBT(upgradeNBT.get(component.componentID), side);
+            component.readNBT(upgradeNBT.get(component.componentID));
         }
         
     }

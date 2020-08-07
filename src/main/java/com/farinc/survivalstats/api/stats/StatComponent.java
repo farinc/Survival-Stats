@@ -56,17 +56,15 @@ public abstract class StatComponent {
 
     /**
      * Serialize this component into a nbt tag. Always runs on the logical server.
-     * @param side This is the same as the {@code IStorage.writeNBT(Capability<ISink>, ISink, Direction)}
      * @return A nbt tag representing this component
      */
-    public abstract INBT writeNBT(Direction side);
+    public abstract INBT writeNBT();
 
     /**
      * Read nbt tag to generate component data. Always runs on the logical server.
      * @param nbt
-     * @param side
      */
-    public abstract void readNBT(INBT nbt, Direction side);
+    public abstract void readNBT(INBT nbt);
 
     //Client stuff
     

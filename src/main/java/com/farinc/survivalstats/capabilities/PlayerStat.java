@@ -1,7 +1,6 @@
 package com.farinc.survivalstats.capabilities;
 
-import java.util.Collection;
-import java.util.LinkedList;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
@@ -24,16 +23,57 @@ public class PlayerStat implements IStatHolder {
     /**
      * The stats of the player
      */
-    private LinkedList<Stat> stats = new LinkedList<Stat>();
+    private Set<Stat> stats = new HashSet<Stat>();
 
-    @Override
-    public LinkedList<Stat> getStatList() {
-        return this.stats;
+    private Stat findStat(String id) {
+        for(Stat e : this.stats){
+            if(e.statID == id) return e;
+        }
+        return null;
     }
 
     @Override
-    public void addStat(Stat stat) {
+    public Set<Stat> getStatList(){
+        return Set.copyOf(this.stats);
+    }
+
+    @Override
+    public void changeStat(String id, int level) {
+        Stat stat = this.findStat(id);
+        stat.setLevel(level);
+    }
+
+    @Override
+    public void addStat(String id) {
+        this.stats.add(StatRegistry.getStatFactory(id).createStat());
+    }
+
+    public void addStat(String id, CompoundNBT nbt){
+        Stat stat = StatRegistry.getStatFactory(id).createStat();
+        stat.readNBT(nbt);
         this.stats.add(stat);
+    }
+
+    @Override
+    public void removeStat(String id) {
+        Stat inst = this.findStat(id);
+        if(inst != null) this.stats.remove(inst);
+    }
+
+    /**
+     * 
+     */
+    public void onChangeReply(){
+
+    }
+
+    /**
+     * Called if anything happens with a stat. 
+     * @param stat
+     * @param isAdded
+     */
+    public void onChange(Stat stat, boolean isAdded) {
+        
     }
 
     public static class PlayerStatIStorage implements IStorage<IStatHolder> {
@@ -43,8 +83,13 @@ public class PlayerStat implements IStatHolder {
             CompoundNBT nbt = new CompoundNBT();
 
             int i = 0;
+
+            /*
+             * Yes, we are using a Set, but the stat1, stat2,...are only meant to cycled through and their id is what determines the 
+             * instantiation. Be aware, that the saved nbt data has no guaranteed order, due to the Set (however, this should never matter).
+             */
             for (Stat stat : instance.getStatList()) {
-                nbt.put("stat" + Integer.toString(i++), stat.writeNBT(side));
+                nbt.put("stat" + Integer.toString(i++), stat.writeNBT());
             }
 
             nbt.putInt("size", i);
@@ -59,20 +104,11 @@ public class PlayerStat implements IStatHolder {
             int size = compoundNBT.getInt("size");
             CompoundNBT statNBT;
             String id;
-            Stat stat;
             for (int i = 0; i < size; i++) {
                 // get the nbt tag for an individual stat
-                statNBT = (CompoundNBT) compoundNBT.get("stat" + Integer.toString(i));
-
-                // grab its id for the factory registry. Then using the factory, instantiate the
-                // stat.
-                id = statNBT.getString("id");
-                stat = StatRegistry.getStatFactory(id).createStat();
-
-                // read the nbt data into the newly instantiated stat and add to the stat holder
-                // instance.
-                stat.readNBT(statNBT, side);
-                instance.addStat(stat);
+                statNBT = compoundNBT.getCompound("stat" + Integer.toString(i));
+                id = statNBT.getString("id"); //Note this is done in the Stat.writeNBT() portion.
+                instance.addStat(id, statNBT);
             }
         }
     }
@@ -89,8 +125,8 @@ public class PlayerStat implements IStatHolder {
     public static class StatCapability implements ICapabilitySerializable<CompoundNBT> {
 
         @CapabilityInject(IStatHolder.class)
-        public static final Capability<IStatHolder> STATEXCHANGER_CAPABILITY = null;
-        private LazyOptional<IStatHolder> instance = LazyOptional.of(STATEXCHANGER_CAPABILITY::getDefaultInstance);
+        public static final Capability<IStatHolder> STAT_CAPABILITY = null;
+        private LazyOptional<IStatHolder> instance = LazyOptional.of(STAT_CAPABILITY::getDefaultInstance);
 
         public static void register() {
             CapabilityManager.INSTANCE.register(IStatHolder.class, new PlayerStat.PlayerStatIStorage(), new PlayerStat.Factory());
@@ -98,17 +134,17 @@ public class PlayerStat implements IStatHolder {
 
         @Override
         public <T> LazyOptional<T> getCapability(Capability<T> cap, Direction side) {
-            return STATEXCHANGER_CAPABILITY.orEmpty(cap, instance);
+            return STAT_CAPABILITY.orEmpty(cap, instance);
         }
 
         @Override
         public CompoundNBT serializeNBT() {
-            return (CompoundNBT) STATEXCHANGER_CAPABILITY.getStorage().writeNBT(STATEXCHANGER_CAPABILITY, instance.orElseThrow(() -> new IllegalArgumentException("LazyOptional cannot be empty!")), null);
+            return (CompoundNBT) STAT_CAPABILITY.getStorage().writeNBT(STAT_CAPABILITY, instance.orElseThrow(() -> new IllegalArgumentException("LazyOptional cannot be empty!")), null);
         }
 
         @Override
         public void deserializeNBT(CompoundNBT nbt) {
-            STATEXCHANGER_CAPABILITY.getStorage().readNBT(STATEXCHANGER_CAPABILITY, instance.orElseThrow(() -> new IllegalArgumentException("LazyOptional cannot be empty!")), null, nbt);
+            STAT_CAPABILITY.getStorage().readNBT(STAT_CAPABILITY, instance.orElseThrow(() -> new IllegalArgumentException("LazyOptional cannot be empty!")), null, nbt);
 
         }
         

@@ -1,9 +1,11 @@
 package com.farinc.survivalstats;
 
 import com.farinc.survivalstats.api.SurvivalStatsAPI;
+import com.farinc.survivalstats.api.stats.StatRegistry;
 import com.farinc.survivalstats.capabilities.PlayerSink;
 import com.farinc.survivalstats.capabilities.PlayerStat;
 import com.farinc.survivalstats.common.config.StatJSONLoader;
+import com.farinc.survivalstats.common.handlers.ClientConnection;
 import com.farinc.survivalstats.common.handlers.HeatTickHandler;
 import com.farinc.survivalstats.common.items.TestHeatItem;
 
@@ -38,6 +40,10 @@ public class SurvivalStats
     public static final HeatTickHandler heathandler = new HeatTickHandler();
 
     public static final StatJSONLoader statloader = new StatJSONLoader();
+
+    public static final StatRegistry registry = new StatRegistry();
+
+    public static final ClientConnection clientHandler = new ClientConnection();
     
     public static TestHeatItem testheatitem;
 
@@ -62,11 +68,12 @@ public class SurvivalStats
         PlayerStat.StatCapability.register();
         statloader.register();
         heathandler.register();
+        clientHandler.register();
     }
 
     private void doClientStuff(final FMLClientSetupEvent event) 
     {
-        // do something that can only be done on the client        
+               
     }
 
     private void enqueueIMC(final InterModEnqueueEvent event)

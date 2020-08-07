@@ -29,7 +29,7 @@ public class NetworkHandler {
     }
 
     public static void registerPackets(){
-        //register each packet individually
+        register(SPacketRegistrySync.class, SPacketRegistrySync::encode, SPacketRegistrySync::decode, SPacketRegistrySync::handle);
     }
 
 

@@ -2,7 +2,10 @@ package com.farinc.survivalstats.api.stats;
 
 import com.google.gson.JsonObject;
 
-public interface IStatFactory<T extends Stat> {
+import net.minecraft.nbt.INBT;
+import net.minecraftforge.common.util.INBTSerializable;
+
+public interface IStatFactory<T extends Stat> extends INBTSerializable<INBT> {
 
     public String getStatID();
 
