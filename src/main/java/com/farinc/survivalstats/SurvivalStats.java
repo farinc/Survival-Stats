@@ -8,6 +8,7 @@ import com.farinc.survivalstats.common.config.StatJSONLoader;
 import com.farinc.survivalstats.common.handlers.ClientConnection;
 import com.farinc.survivalstats.common.handlers.HeatTickHandler;
 import com.farinc.survivalstats.common.items.TestHeatItem;
+import com.farinc.survivalstats.common.network.NetworkHandler;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -69,6 +70,7 @@ public class SurvivalStats
         statloader.register();
         heathandler.register();
         clientHandler.register();
+        NetworkHandler.registerPackets();
     }
 
     private void doClientStuff(final FMLClientSetupEvent event) 

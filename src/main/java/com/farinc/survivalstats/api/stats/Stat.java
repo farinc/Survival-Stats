@@ -7,7 +7,6 @@ import com.farinc.survivalstats.api.SurvivalStatsAPI.TickRate;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
-import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 
 /**
@@ -18,7 +17,7 @@ public abstract class Stat {
     /**
      * The current level of a instance
      */
-    protected int level;
+    protected int level = 0;
 
     /**
      * The stat id passed to this stat. The really only good way to do so is through the factory.
@@ -48,7 +47,7 @@ public abstract class Stat {
         //Write the upgrade cost for the next level 
         CompoundNBT upgradeNBT = new CompoundNBT();
         INBT componentNBT;
-        for(StatComponent component : this.getUpgradeComponents(this.level + 1)){
+        for(StatComponent component : this.getComponents(this.level + 1)){
             componentNBT = component.writeNBT();
             upgradeNBT.put(component.componentID, componentNBT);
         }
@@ -66,7 +65,7 @@ public abstract class Stat {
 
         //Write the upgrade cost for the next level
         CompoundNBT upgradeNBT = nbt.getCompound("upgrade");
-        for(StatComponent component : this.getUpgradeComponents(this.level + 1)){
+        for(StatComponent component : this.getComponents(this.level + 1)){
             component.readNBT(upgradeNBT.get(component.componentID));
         }
         
@@ -90,14 +89,14 @@ public abstract class Stat {
         return this.level;
     }
 
-    public final void setLevel(int newLevel){
+    protected final void setLevel(int newLevel){
         int netChange = newLevel - this.level;
         this.level = newLevel;
         this.onLevelChange(netChange);
     }
 
     public final void updateUpgradeComponents(PlayerEntity player){
-        for(StatComponent com : this.getUpgradeComponents(this.level + 1)){
+        for(StatComponent com : this.getComponents(this.level + 1)){
             com.update(player);
         }
     }
@@ -108,9 +107,69 @@ public abstract class Stat {
      * @param level
      * @return
      */
-    public final StatComponent[] getUpgradeComponents(int level) {
+    public final StatComponent[] getComponents(int level) {
         if(level >= 1 && level < this.components.length) return this.components[level - 1];
         return null;
+    }
+
+    /**
+     * Get the components of the next level upgrade. 
+     * @return Either a array of StatComponents, a empty array if no components exist, or null if there is no greater upgrade
+     */
+    public final StatComponent[] getUpgradeComponents() {
+        int nextLevel = this.level + 1;
+        if(nextLevel <= this.getMaxLevel()){
+            return this.getComponents(nextLevel);
+        }else{
+            return null;
+        }
+    }
+
+    /**
+     * Determines if this player can purchase the next level from the associated components.
+     * @param player the player this upgrade is concerned with.
+     * @return A single string of comma separated ids of the components that could not be purchased or null if it could
+     */
+    public final String canUpgrade(PlayerEntity player){
+        StatComponent[] components = this.getUpgradeComponents();
+
+        if(components != null){
+            int size = components.length;
+            StringBuilder missingComponents = new StringBuilder();
+
+            for(int i = 0; i < size; i++){
+                if(!components[i].canPurchase(player)){
+                    missingComponents.append(components[i].componentID).append(',');
+                }
+            }
+
+            return missingComponents.toString();
+        }else{
+            return null;
+        }
+    }
+
+    /**
+     * Actually purchases the upgrades for the stat.
+     * @param player
+     * @param bypass A flag to effectively ignore the requirements of the components.
+     */
+    public final void purchaseUpgrade(PlayerEntity player, boolean bypass){
+
+        if(bypass){
+            this.setLevel(this.level + 1);
+        }else{
+            StatComponent[] components = this.getUpgradeComponents();
+            int size = components.length;
+
+            if(components != null){
+                for(int i = 0; i < size; i++){
+                    components[i].enforcePurchase(player);
+                }
+
+                this.setLevel(this.level + 1);
+            }
+        }
     }
 
     /**
@@ -124,6 +183,8 @@ public abstract class Stat {
     /**
      * Gives the stat the ability to react to the change in level. Note however that {@link #setLevel(int)}
      * that the new level has already been set. This is mostly for convenience and reinforcement of concept.
+     * Note that this also happens after the components have been "bought" so this is a sort of post player
+     * purchase.
      * @param netChange The change in level. The value is negative if it was a decrease in level and positive
      * for an upgrade in level.
      */

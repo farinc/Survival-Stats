@@ -8,6 +8,7 @@ import com.farinc.survivalstats.api.stats.Stat;
 import com.farinc.survivalstats.api.stats.StatRegistry;
 import com.farinc.survivalstats.api.stats.IStatHolder;
 
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.util.Direction;
@@ -25,7 +26,8 @@ public class PlayerStat implements IStatHolder {
      */
     private Set<Stat> stats = new HashSet<Stat>();
 
-    private Stat findStat(String id) {
+    @Override
+    public Stat getStat(String id) {
         for(Stat e : this.stats){
             if(e.statID == id) return e;
         }
@@ -38,9 +40,11 @@ public class PlayerStat implements IStatHolder {
     }
 
     @Override
-    public void changeStat(String id, int level) {
-        Stat stat = this.findStat(id);
-        stat.setLevel(level);
+    public void upgradeStat(String id, PlayerEntity player) {
+        Stat stat = this.getStat(id);
+
+        //I really dont like this, but it will do for now...
+        stat.purchaseUpgrade(player, true);
     }
 
     @Override
@@ -56,7 +60,7 @@ public class PlayerStat implements IStatHolder {
 
     @Override
     public void removeStat(String id) {
-        Stat inst = this.findStat(id);
+        Stat inst = this.getStat(id);
         if(inst != null) this.stats.remove(inst);
     }
 
