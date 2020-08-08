@@ -29,9 +29,9 @@ public interface ISourceImpl extends ISource {
 	public SourceType getSourceType();
 	
 	default float getIntensity() {
-		switch((int)Math.signum(this.getSourceIntensity())) {
-		case 1: return this.getSourceIntensity();
-		case -1: return this.getSourceIntensity() * -1;
+		switch(this.getSourceType()) {
+		case HOT: return this.getSourceIntensity();
+		case COLD: return this.getSourceIntensity() * -1;
 		default: return 0;
 		}
 	}
