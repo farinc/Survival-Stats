@@ -1,17 +1,12 @@
 package com.farinc.survivalstats;
 
-import com.farinc.survivalstats.api.SurvivalStatsAPI;
-import com.farinc.survivalstats.api.stats.StatRegistry;
-import com.farinc.survivalstats.capabilities.PlayerSink;
-import com.farinc.survivalstats.capabilities.PlayerStat;
-import com.farinc.survivalstats.common.config.StatJSONLoader;
-import com.farinc.survivalstats.common.handlers.ClientConnection;
-import com.farinc.survivalstats.common.handlers.HeatTickHandler;
-import com.farinc.survivalstats.common.items.TestHeatItem;
-import com.farinc.survivalstats.common.network.NetworkHandler;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import com.farinc.survivalstats.api.SurvivalStatsAPI;
+import com.farinc.survivalstats.capabilities.PlayerSink;
+import com.farinc.survivalstats.common.handlers.HeatTickHandler;
+import com.farinc.survivalstats.common.items.TestHeatItem;
 
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
@@ -39,12 +34,6 @@ public class SurvivalStats
     public static final String MODID = "survivalstats";
     
     public static final HeatTickHandler heathandler = new HeatTickHandler();
-
-    public static final StatJSONLoader statloader = new StatJSONLoader();
-
-    public static final StatRegistry registry = new StatRegistry();
-
-    public static final ClientConnection clientHandler = new ClientConnection();
     
     public static TestHeatItem testheatitem;
 
@@ -66,11 +55,7 @@ public class SurvivalStats
     private void setup(final FMLCommonSetupEvent event)
     {
     	PlayerSink.HeatCapability.register();
-        PlayerStat.StatCapability.register();
-        statloader.register();
         heathandler.register();
-        clientHandler.register();
-        NetworkHandler.registerPackets();
     }
 
     private void doClientStuff(final FMLClientSetupEvent event) 
@@ -105,10 +90,8 @@ public class SurvivalStats
     public void attachCap(final AttachCapabilitiesEvent<Entity> event) {
     	if(event.getObject() instanceof PlayerEntity ) {
             PlayerSink.HeatCapability cap = new PlayerSink.HeatCapability();
-            PlayerStat.StatCapability cap1 = new PlayerStat.StatCapability();
             
             event.addCapability(new ResourceLocation(MODID, "heat"), cap);
-            event.addCapability(new ResourceLocation(MODID, "stat"), cap1);
     	}
     }
     
